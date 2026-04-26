@@ -7,10 +7,10 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-COPY plugin/ ./
+COPY backend/ ./
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-EXPOSE 4355
+EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "4355"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

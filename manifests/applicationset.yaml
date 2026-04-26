@@ -9,6 +9,9 @@ spec:
       configMapRef:
         name: tenant-generator-plugin
       requeueAfterSeconds: 120
+      input:
+        parameters:
+          organization: "demo-corp"
     selector:
       matchExpressions:
         - key: status
@@ -19,22 +22,25 @@ spec:
   goTemplate: true
   template:
     metadata:
-      name: 'foobar-app-{{ .tenant | lower | replace "_" "-" }}'
+      name: '{{ .project }}-{{ .environment }}-{{ .tenant | lower | replace "_" "-" }}'
       labels:
-        org: '{{ .tenant }}'
+        org: 'demo-corp'
+        project: '{{ .project }}'
+        environment: '{{ .environment }}'
+        tenant: '{{ .tenant }}'
     spec:
       project: default
       destination:
         server: "https://kubernetes.default.svc"
-        namespace: foobar-service
+        namespace: '{{ .project }}-{{ .environment }}'
       source:
-        chart: podinfo
-        repoURL: https://stefanprodan.github.io/podinfo
-        targetRevision: 6.7.0
+        chart: '{{ .chart }}'
+        repoURL: '{{ .repo_url }}'
+        targetRevision: '{{ .target_revision }}'
         helm:
           parameters:
           - name: "fullnameOverride"
-            value: 'foobar-app-{{ .tenant | lower | replace "_" "-" }}'
+            value: '{{ .project }}-{{ .tenant | lower | replace "_" "-" }}'
       syncPolicy:
         automated:
           prune: true

@@ -4,13 +4,10 @@ version = "0.1.0"
 description = "A plugin for Argo CD ApplicationSet Generator"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["psycopg2-binary", "fastapi", "uvicorn"]
+dependencies = ["psycopg2-binary", "fastapi", "uvicorn", "sqlalchemy"]
 
 [dependency-groups]
-dev = [
-    "prek>=0.3.9",
-    "ruff>=0.14.7",
-]
+dev = ["prek>=0.3.9", "ruff>=0.14.7"]
 
 [tool.uv]
 python-preference = "managed"

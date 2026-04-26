@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  plugin:
+    build: .
+    ports:
+      - "4355:4355"
+    environment:
+      DB_NAME: organization
+      DB_USER: postgres
+      DB_PASSWORD: mysecretpassword
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      AUTH_TOKEN: mysecretpassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DB_NAME: organization
+      DB_USER: postgres
+      DB_PASSWORD: mysecretpassword
+      DB_HOST: postgres
+      DB_PORT: "5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - plugin
+      - backend
+
+volumes:
+  pgdata:

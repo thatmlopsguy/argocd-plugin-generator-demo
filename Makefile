@@ -44,13 +44,37 @@ argo-cd-password: ## Get argocd password
 	@kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
 ##@ Docker
-docker-build: ## Build docker image
+docker-build-plugin: ## Build plugin docker image
 	docker build -t $(PROJECT_NAME):latest .
+
+docker-build-backend: ## Build backend docker image
+	docker build -t $(PROJECT_NAME)-backend:latest ./backend
+
+docker-build-frontend: ## Build frontend docker image
+	docker build -t $(PROJECT_NAME)-frontend:latest ./frontend
+
+docker-compose-up: ## Start services with docker compose
+	docker compose up --build -d
+
+docker-compose-down: ## Stop docker compose services
+	docker compose down
 
 ##@ Plugin
 plugin-svc: ## Deploy the plugin to the cluster
 	@kubectl port-forward svc/tenant-generator-plugin -n argocd 4355:8080
 
 ##@ Development
-start-dev: ## Start development server
+start-plugin: ## Start plugin (ArgoCD) dev server
 	@uv run plugin/main.py
+
+start-backend: ## Start backend API dev server
+	@uv run backend/main.py
+
+start-frontend: ## Start frontend dev server
+	@cd frontend && npm run dev
+
+install-frontend: ## Install frontend dependencies
+	@cd frontend && npm install
+
+build-frontend: ## Build frontend for production
+	@cd frontend && npm run build
