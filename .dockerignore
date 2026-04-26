@@ -1,0 +1,4 @@
+argocd/
+.github/
+.git/
+manifests/

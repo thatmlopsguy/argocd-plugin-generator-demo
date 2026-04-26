@@ -1,12 +1,15 @@
-FROM python:3.10-slim
+FROM python:3.13.13-slim-trixie@sha256:d2462a6bed37b4fc6cabecf5a2132ae70df772fe03c7393c4d98a0c2fb48aa2e
+
+COPY --from=ghcr.io/astral-sh/uv:0.7 /uv /uvx /bin/
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY plugin/main.py .
 
-COPY . .
+ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 4355
 

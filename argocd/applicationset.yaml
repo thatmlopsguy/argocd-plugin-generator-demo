@@ -9,6 +9,13 @@ spec:
       configMapRef:
         name: tenant-generator-plugin
       requeueAfterSeconds: 120
+    selector:
+      matchExpressions:
+        - key: status
+          operator: In
+          values:
+            - trial
+            - active
   goTemplate: true
   template:
     metadata:

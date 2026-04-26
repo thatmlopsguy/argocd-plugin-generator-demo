@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init-sql
+  namespace: argocd
 data:
   init.sql: |
     CREATE DATABASE organization;
@@ -30,6 +31,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: postgres-secret
+  namespace: argocd
 type: Opaque
 data:
   POSTGRES_USER: cG9zdGdyZXM=  # base64 encoded value of 'postgres'
@@ -39,6 +41,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-deployment
+  namespace: argocd
 spec:
   replicas: 1
   selector:
@@ -69,16 +72,23 @@ spec:
             - name: init-sql
               mountPath: /docker-entrypoint-initdb.d
               readOnly: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
         - name: init-sql
           configMap:
             name: postgres-init-sql
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: postgres-service
+  namespace: argocd
 spec:
   ports:
     - protocol: TCP

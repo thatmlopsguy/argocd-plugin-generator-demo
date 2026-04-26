@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tenant-generator-plugin
+  namespace: argocd
   labels:
     app: tenant-generator-plugin
 spec:
@@ -15,8 +16,9 @@ spec:
         app: tenant-generator-plugin
     spec:
       containers:
-      - name: tenent-generator-plugin
-        image: tanmaybhat/tenant-generator-plugin-demo:latest
+      - name: tenant-generator-plugin
+        image: argocd-plugin-tenant-generator:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 4355
         env:
@@ -44,11 +46,19 @@ spec:
             secretKeyRef:
               name: api-credentials
               key: 'plugin.auth.token'
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: tenant-generator-plugin
+  namespace: argocd
 spec:
   type: ClusterIP
   selector:
@@ -62,6 +72,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: db-credentials
+  namespace: argocd
 type: Opaque
 data:
   db_name: b3JnYW5pemF0aW9u
@@ -72,16 +83,16 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: api-credentials
+  namespace: argocd
 type: Opaque
 data:
   plugin.auth.token: bXlzZWNyZXRwYXNzd29yZA==
 ---
 apiVersion: v1
-data:
-  baseUrl: http://tenant-generator-plugin:8080
-  token: $api-credentials:plugin.auth.token
 kind: ConfigMap
 metadata:
   name: tenant-generator-plugin
   namespace: argocd
-  
+data:
+  baseUrl: http://tenant-generator-plugin:8080
+  token: $api-credentials:plugin.auth.token
